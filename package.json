@@ -1,0 +1,31 @@
+{
+  "name": "twobits.js",
+  "version": "0.0.0",
+  "description": "A lightweight template library for the DOM.",
+  "main": "twobits.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:minznerjosh/twobits.js.git"
+  },
+  "keywords": [
+    "template",
+    "browserify"
+  ],
+  "author": "Joshua D. Minzner",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/minznerjosh/twobits.js/issues"
+  },
+  "homepage": "https://github.com/minznerjosh/twobits.js",
+  "devDependencies": {
+    "gulp": "^3.6.2",
+    "gulp-karma": "0.0.4",
+    "jquery-browserify": "^1.8.1",
+    "karma": "^0.12.16",
+    "karma-commonjs": "0.0.7",
+    "karma-jasmine": "^0.2.2"
+  }
+}
