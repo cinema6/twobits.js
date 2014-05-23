@@ -22,7 +22,10 @@
   "homepage": "https://github.com/minznerjosh/twobits.js",
   "devDependencies": {
     "gulp": "^3.6.2",
+    "gulp-browserify": "^0.5.0",
     "gulp-karma": "0.0.4",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^0.3.0",
     "jquery-browserify": "^1.8.1",
     "karma": "^0.12.16",
     "karma-commonjs": "0.0.7",

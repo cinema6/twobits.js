@@ -3,7 +3,10 @@
 
     var gulp = require('gulp');
 
-    var karma = require('gulp-karma');
+    var karma = require('gulp-karma'),
+        browserify = require('gulp-browserify'),
+        uglify = require('gulp-uglify'),
+        rename = require('gulp-rename');
 
     var srcFiles = [
             'twobits.js'
@@ -36,5 +39,16 @@
                 configFile: 'test/karma.conf.js',
                 action: 'watch'
             }));
+    });
+
+    gulp.task('build', ['test:unit'], function() {
+        return gulp.src('./twobits.js')
+            .pipe(browserify({
+                standalone: 'tb'
+            }))
+            .pipe(gulp.dest('./dist'))
+            .pipe(uglify())
+            .pipe(rename('twobits.min.js'))
+            .pipe(gulp.dest('./dist'));
     });
 }());
