@@ -29,6 +29,7 @@
     "jquery-browserify": "^1.8.1",
     "karma": "^0.12.16",
     "karma-commonjs": "0.0.7",
-    "karma-jasmine": "^0.2.2"
+    "karma-jasmine": "^0.2.2",
+    "karma-phantomjs-launcher": "^0.1.4"
   }
 }
