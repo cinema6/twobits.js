@@ -1,4 +1,6 @@
 module.exports = (function() {
+    'use strict';
+
     var matcher = /{{.+?}}/g,
         attrPrefix = /^tb-/;
 
@@ -11,6 +13,16 @@ module.exports = (function() {
         }
     }
 
+    function map(array, cb) {
+        var result = [];
+
+        forEach(array, function(item, index) {
+            result[index] = cb(item, index);
+        });
+
+        return result;
+    }
+
     function forEachNode(root, cb) {
         cb(root);
 
@@ -20,34 +32,27 @@ module.exports = (function() {
     }
 
     function get(object, property) {
-        var props = property.split('.');
+        var props = (property || '').split('.') || undefined;
 
-        return props.reduce(function(object, prop) {
+        return props && props.reduce(function(object, prop) {
             return object && object[prop];
         }, object);
     }
 
-    function compile(string, object) {
-        var matches = string.match(matcher);
+    function compile(template, keys, object) {
+        var string = '';
 
-        forEach(matches, function(match) {
-            string = string.replace(
-                match,
-                get(
-                    object,
-                    match.substring(
-                        2,
-                        match.length - 2
-                    )
-                )
-            );
+        forEach(template, function(part, index) {
+            string += part + (get(object, keys[index]) || '');
         });
 
         return string;
     }
 
-    function hasTemplate(string) {
-        return matcher.test(string);
+    function keysOfTemplate(template) {
+        return map(template.match(matcher), function(match) {
+            return match.substring(2, match.length - 2);
+        });
     }
 
     return {
@@ -55,13 +60,15 @@ module.exports = (function() {
             var nodes = [];
 
             forEachNode(root, function(node) {
-                var item;
+                var item,
+                    keys;
 
-                if (node instanceof Text && hasTemplate(node.textContent)) {
+                if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
                         attributes: null,
                         text: {
-                            template: node.textContent,
+                            template: node.textContent.split(matcher),
+                            keys: keys,
                             node: node
                         }
                     };
@@ -71,7 +78,7 @@ module.exports = (function() {
                     var value = attr.value,
                         name = attr.name;
 
-                    if (hasTemplate(value)) {
+                    if ((keys = keysOfTemplate(value)).length) {
                         if (attrPrefix.test(name)) {
                             name = name.replace(attrPrefix, '');
 
@@ -83,7 +90,8 @@ module.exports = (function() {
                             attributes: [],
                             text: null
                         })).attributes.push({
-                            template: value,
+                            template: value.split(matcher),
+                            keys: keys,
                             domAttr: attr
                         });
                     }
@@ -96,13 +104,17 @@ module.exports = (function() {
 
             return function(context) {
                 forEach(nodes, function(node) {
-                    if (node.text) {
-                        node.text.node.textContent = compile(node.text.template, context);
+                    var text;
+
+                    /* jshint boss:true */
+                    if (text = node.text) {
+                    /* jshint boss:false */
+                        text.node.textContent = compile(text.template, text.keys, context);
                     }
 
                     if (node.attributes) {
                         forEach(node.attributes, function(attr) {
-                            attr.domAttr.value = compile(attr.template, context);
+                            attr.domAttr.value = compile(attr.template, attr.keys, context);
                         });
                     }
                 });
