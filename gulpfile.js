@@ -6,7 +6,8 @@
     var karma = require('gulp-karma'),
         browserify = require('gulp-browserify'),
         uglify = require('gulp-uglify'),
-        rename = require('gulp-rename');
+        rename = require('gulp-rename'),
+        bump = require('gulp-bump');
 
     var srcFiles = [
             'twobits.js'
@@ -50,5 +51,13 @@
             .pipe(uglify())
             .pipe(rename('twobits.min.js'))
             .pipe(gulp.dest('./dist'));
+    });
+
+    gulp.task('bump', ['test:unit'], function() {
+        return gulp.src('./package.json')
+            .pipe(bump({
+                type: gulp.env.type
+            }))
+            .pipe(gulp.dest('./'));
     });
 }());
