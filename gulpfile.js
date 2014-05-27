@@ -9,6 +9,8 @@
         rename = require('gulp-rename'),
         bump = require('gulp-bump');
 
+    var args = require('minimist')(process.argv.slice(2));
+
     var srcFiles = [
             'twobits.js'
         ],
@@ -56,7 +58,7 @@
     gulp.task('bump', ['test:unit'], function() {
         return gulp.src('./package.json')
             .pipe(bump({
-                type: gulp.env.type
+                type: args.type
             }))
             .pipe(gulp.dest('./'));
     });
