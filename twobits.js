@@ -18,6 +18,17 @@ module.exports = (function() {
         };
     }());
 
+    function arrayFrom(arrayLike) {
+        var length = arrayLike.length;
+        var array = [];
+
+        while (length--) {
+            array[length] = arrayLike[length];
+        }
+
+        return array;
+    }
+
     function forEach(array, cb) {
         var length = (array || []).length,
             index = 0;
@@ -40,7 +51,7 @@ module.exports = (function() {
     function forEachNode(root, cb) {
         cb(root);
 
-        forEach(root.childNodes, function(node) {
+        forEach(arrayFrom(root.childNodes), function(node) {
             forEachNode(node, cb);
         });
     }
@@ -70,6 +81,10 @@ module.exports = (function() {
     }
 
     return {
+        clear: function() {
+            directives.length = 0;
+        },
+
         directive: function(matcher, parseFn) {
             directives.push({
                 matcher: matcher,

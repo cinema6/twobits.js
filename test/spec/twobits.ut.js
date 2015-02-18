@@ -50,9 +50,16 @@
 
             beforeEach(function() {
                 compileFn = jasmine.createSpy('compileFn()');
-                parseFn = jasmine.createSpy('parseFn()').and.returnValue(compileFn);
+                parseFn = jasmine.createSpy('parseFn()').and.callFake(function(element) {
+                    element.insertAdjacentHTML('beforebegin', '<!-- Foo -->');
+                    return compileFn;
+                });
 
                 result = tb.directive('div', parseFn);
+            });
+
+            afterEach(function() {
+                tb.clear();
             });
 
             it('should be chainable', function() {
