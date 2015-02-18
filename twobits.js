@@ -4,6 +4,20 @@ module.exports = (function() {
     var matcher = /{{.+?}}/g,
         attrPrefix = /^tb-/;
 
+    var directives = [];
+
+    var matches = (function() {
+        var proto = Element.prototype;
+        var fn = proto.matches ||
+            proto.webkitMatchesSelector ||
+            proto.mozMatchesSelector ||
+            proto.msMatchesSelector;
+
+        return function(element, selector) {
+            return element instanceof Element && fn.call(element, selector);
+        };
+    }());
+
     function forEach(array, cb) {
         var length = (array || []).length,
             index = 0;
@@ -56,12 +70,28 @@ module.exports = (function() {
     }
 
     return {
+        directive: function(matcher, parseFn) {
+            directives.push({
+                matcher: matcher,
+                parse: parseFn
+            });
+
+            return this;
+        },
+
         parse: function(root) {
             var nodes = [];
+            var compileFns = [];
 
             forEachNode(root, function(node) {
                 var item,
                     keys;
+
+                forEach(directives, function(directive) {
+                    if (matches(node, directive.matcher)) {
+                        compileFns.push(directive.parse(node));
+                    }
+                });
 
                 if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
@@ -103,6 +133,10 @@ module.exports = (function() {
             });
 
             return function(context) {
+                function getter(prop) {
+                    return prop ? get(context, prop) : context;
+                }
+
                 forEach(nodes, function(node) {
                     var text;
 
@@ -118,6 +152,8 @@ module.exports = (function() {
                         });
                     }
                 });
+
+                forEach(compileFns, function(fn) { fn(getter); });
             };
         }
     };

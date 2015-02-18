@@ -29,6 +29,7 @@
                         '<p id="test-text-multiple">{{name}} is {{name}}!</p>',
                         '<img id="test-attr-prefix" tb-src="{{img}}"></img>',
                     '</section>',
+                    '<div></div>',
                 '</div>'
             ].join('\n'));
             $('body').append($testBox);
@@ -40,6 +41,83 @@
 
         it('should exist', function() {
             expect(tb).toEqual(jasmine.any(Object));
+        });
+
+        describe('tb.directive(matcher, parseFn)', function() {
+            var result;
+            var parseFn;
+            var compileFn;
+
+            beforeEach(function() {
+                compileFn = jasmine.createSpy('compileFn()');
+                parseFn = jasmine.createSpy('parseFn()').and.returnValue(compileFn);
+
+                result = tb.directive('div', parseFn);
+            });
+
+            it('should be chainable', function() {
+                expect(result).toBe(tb);
+            });
+
+            describe('when an element is parsed', function() {
+                var compile;
+
+                beforeEach(function() {
+                    compile = tb.parse($testBox[0]);
+                });
+
+                it('should call the directive parseFn for each matched element', function() {
+                    $.each($testBox.find('div'), function(index, element) {
+                        expect(parseFn).toHaveBeenCalledWith(element);
+                    });
+                    expect(parseFn).toHaveBeenCalledWith($testBox[0]);
+                    expect(parseFn.calls.count()).toBe(3);
+                });
+
+                describe('when the element is compiled', function() {
+                    var data;
+
+                    beforeEach(function() {
+                        data = {
+                            dims: {
+                                width: 300,
+                                height: 125
+                            },
+                            classes: {
+                                p: {
+                                    name: 'texty'
+                                }
+                            },
+                            name: 'Joshua Minzner',
+                            img: 'foo.jpg'
+                        };
+
+                        compile(data);
+                    });
+
+                    it('should call the compileFn() for each element', function() {
+                        expect(compileFn.calls.count()).toBe(3);
+                        compileFn.calls.all().forEach(function(call) {
+                            expect(call.args).toEqual([jasmine.any(Function)]);
+                        });
+                    });
+
+                    describe('the provided function', function() {
+                        var get;
+
+                        beforeEach(function() {
+                            get = compileFn.calls.mostRecent().args[0];
+                        });
+
+                        it('should be an accessor for the new', function() {
+                            expect(get()).toBe(data);
+                            expect(get('dims')).toBe(data.dims);
+                            expect(get('classes.p.name')).toBe(data.classes.p.name);
+                            expect(get('this.does.not.exist')).toBeUndefined();
+                        });
+                    });
+                });
+            });
         });
 
         describe('tb.parse(node)', function() {
