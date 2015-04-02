@@ -68,16 +68,18 @@
 
             describe('when an element is parsed', function() {
                 var compile;
+                var data;
 
                 beforeEach(function() {
-                    compile = tb.parse($testBox[0]);
+                    data = { hello: 'world' };
+                    compile = tb.parse($testBox[0], data);
                 });
 
                 it('should call the directive parseFn for each matched element', function() {
                     $.each($testBox.find('div'), function(index, element) {
-                        expect(parseFn).toHaveBeenCalledWith(element);
+                        expect(parseFn).toHaveBeenCalledWith(element, data);
                     });
-                    expect(parseFn).toHaveBeenCalledWith($testBox[0]);
+                    expect(parseFn).toHaveBeenCalledWith($testBox[0], data);
                     expect(parseFn.calls.count()).toBe(3);
                 });
 

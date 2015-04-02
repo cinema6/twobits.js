@@ -94,7 +94,7 @@ module.exports = (function() {
             return this;
         },
 
-        parse: function(root) {
+        parse: function(root, context) {
             var nodes = [];
             var compileFns = [];
 
@@ -104,7 +104,7 @@ module.exports = (function() {
 
                 forEach(directives, function(directive) {
                     if (matches(node, directive.matcher)) {
-                        compileFns.push(directive.parse(node));
+                        compileFns.push(directive.parse(node, context));
                     }
                 });
 
