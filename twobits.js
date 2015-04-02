@@ -64,11 +64,11 @@ module.exports = (function() {
         }, object);
     }
 
-    function compile(template, keys, object) {
+    function compile(template, values) {
         var string = '';
 
         forEach(template, function(part, index) {
-            string += part + (get(object, keys[index]) || '');
+            string += part + (values[index] || '');
         });
 
         return string;
@@ -78,6 +78,20 @@ module.exports = (function() {
         return map(template.match(matcher), function(match) {
             return match.substring(2, match.length - 2);
         });
+    }
+
+    function isDirty(entry, values) {
+        var previousValues = entry.values;
+        var length = previousValues.length;
+
+        while (length--) {
+            if (previousValues[length] !== values[length]) {
+                entry.values = values;
+                return true;
+            }
+        }
+
+        return false;
     }
 
     return {
@@ -114,6 +128,7 @@ module.exports = (function() {
                         text: {
                             template: node.textContent.split(matcher),
                             keys: keys,
+                            values: new Array(keys.length),
                             node: node
                         }
                     };
@@ -137,6 +152,7 @@ module.exports = (function() {
                         })).attributes.push({
                             template: value.split(matcher),
                             keys: keys,
+                            values: new Array(keys.length),
                             domAttr: attr
                         });
                     }
@@ -154,16 +170,25 @@ module.exports = (function() {
 
                 forEach(nodes, function(node) {
                     var text;
+                    var values;
 
                     /* jshint boss:true */
                     if (text = node.text) {
                     /* jshint boss:false */
-                        text.node.textContent = compile(text.template, text.keys, context);
+                        values = map(text.keys, getter);
+
+                        if (isDirty(text, values)) {
+                            text.node.textContent = compile(text.template, values);
+                        }
                     }
 
                     if (node.attributes) {
                         forEach(node.attributes, function(attr) {
-                            attr.domAttr.value = compile(attr.template, attr.keys, context);
+                            values = map(attr.keys, getter);
+
+                            if (isDirty(attr, values)) {
+                                attr.domAttr.value = compile(attr.template, values);
+                            }
                         });
                     }
                 });

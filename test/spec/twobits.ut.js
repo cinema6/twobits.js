@@ -208,6 +208,44 @@
 
                     expect($prefixed.attr('src')).toBe('foo.jpg');
                 });
+
+                describe('if called again', function() {
+                    beforeEach(function() {
+                        model = {
+                            dims: {
+                                width: 300,
+                                height: 100
+                            },
+                            classes: {
+                                p: {
+                                    name: 'texty'
+                                }
+                            },
+                            name: 'Jessica Minzner',
+                            img: 'foo.jpg'
+                        };
+
+                        compile(model);
+                    });
+
+                    it('should update the attributes', function() {
+                        var $testAttrStyle = $testBox.find('#test-attr-style');
+                        var $testAttrClass = $testBox.find('#test-attr-class');
+                        var $testAttrPrefix = $testBox.find('#test-attr-prefix');
+
+                        expect($testAttrStyle.attr('style')).toBe('width: 300px; height: 100px;');
+                        expect($testAttrClass.attr('class')).toBe('texty');
+                        expect($testAttrPrefix.attr('src')).toBe('foo.jpg');
+                    });
+
+                    it('should update the text', function() {
+                        var $testTextP = $testBox.find('#test-text-p');
+                        var $testTextMultiple = $testBox.find('#test-text-multiple');
+
+                        expect($testTextP.text()).toBe('Hello. My Name is Jessica Minzner!');
+                        expect($testTextMultiple.text()).toBe('Jessica Minzner is Jessica Minzner!');
+                    });
+                });
             });
         });
     });
