@@ -31,6 +31,7 @@
                     '</section>',
                     '<div></div>',
                     '<span id="test-falsy">{{false}}{{zero}}{{null}}{{undefined}}</span>',
+                    '<span id="test-array-notation">{{people[1].parents[0].name}}</span>',
                 '</div>'
             ].join('\n'));
             $('body').append($testBox);
@@ -225,7 +226,11 @@
                         false: false,
                         zero: 0,
                         undefined: undefined,
-                        null: null
+                        null: null,
+                        people: [
+                            null,
+                            { parents: [{ name: 'Harold' }] }
+                        ]
                     };
 
                     compile = result;
@@ -279,6 +284,10 @@
                     var $multiple = $testBox.find('#test-text-multiple');
 
                     expect($multiple.text()).toBe('Joshua Minzner is Joshua Minzner!');
+                });
+
+                it('should support array notation', function() {
+                    expect($testBox.find('#test-array-notation').text()).toBe('Harold');
                 });
 
                 it('should bind attributes prefixed with "tb" to their unprefixed counterpart', function() {

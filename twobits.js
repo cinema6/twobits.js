@@ -61,7 +61,7 @@ module.exports = (function() {
     }
 
     function get(object, property) {
-        var props = (property || '').split('.') || undefined;
+        var props = property.match(/[^.\[\]]+/g);
 
         return props && props.reduce(function(object, prop) {
             return object && object[prop];
