@@ -131,7 +131,7 @@ module.exports = (function() {
                         text: {
                             template: node.textContent.split(matcher),
                             keys: keys,
-                            values: new Array(keys.length),
+                            values: keys,
                             node: node
                         }
                     };
@@ -155,7 +155,7 @@ module.exports = (function() {
                         })).attributes.push({
                             template: value.split(matcher),
                             keys: keys,
-                            values: new Array(keys.length),
+                            values: keys,
                             domAttr: attr
                         });
                     }

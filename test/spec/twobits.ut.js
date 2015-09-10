@@ -25,7 +25,7 @@
                     '</div>',
                     '<section>',
                         '<p id="test-attr-class" class="{{classes.p.name}}">Cool</p>',
-                        '<p id="test-text-p">Hello. My Name is {{name}}!</p>',
+                        '<p id="test-text-p" data-foo="{{bar}}">Hello. My Name is {{name}}!</p>',
                         '<p id="test-text-multiple">{{name}} is {{name}}!</p>',
                         '<img id="test-attr-prefix" tb-src="{{img}}"></img>',
                     '</section>',
@@ -208,6 +208,11 @@
                     model.name = 'Jessica Minzner';
                     compile(model);
                     expect($pText.text()).toBe('Hello. My Name is Jessica Minzner!');
+                });
+
+                it('should make bindings for missing properties disappear', function() {
+                    expect($testBox.find('#test-attr-style').parent().text().replace(/\n/g, '')).toBe('Hello');
+                    expect($testBox.find('#test-text-p').attr('data-foo')).toBe('');
                 });
 
                 it('should support multiple bindings to the same property', function() {
