@@ -108,7 +108,10 @@ module.exports = (function() {
             return this;
         },
 
-        parse: function(root, context) {
+        parse: function(root, _options_) {
+            var options = _options_ || {};
+            var context = options.context;
+
             var nodes = [];
             var compileFns = [];
 

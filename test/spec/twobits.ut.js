@@ -72,7 +72,7 @@
 
                 beforeEach(function() {
                     data = { hello: 'world' };
-                    compile = tb.parse($testBox[0], data);
+                    compile = tb.parse($testBox[0], { context: data });
                 });
 
                 it('should call the directive parseFn for each matched element', function() {
@@ -126,10 +126,23 @@
                         });
                     });
                 });
+
+                describe('without options', function() {
+                    beforeEach(function() {
+                        parseFn.calls.reset();
+                        compile = tb.parse($testBox[0]);
+                    });
+
+                    it('should call the directive parseFn with no context', function() {
+                        $.each($testBox.find('div'), function(index, element) {
+                            expect(parseFn).toHaveBeenCalledWith(element, undefined);
+                        });
+                    });
+                });
             });
         });
 
-        describe('tb.parse(node)', function() {
+        describe('tb.parse(node, options)', function() {
             var result;
 
             beforeEach(function() {
