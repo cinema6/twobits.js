@@ -18,6 +18,10 @@ module.exports = (function() {
         };
     }());
 
+    function existy(value) {
+        return value !== undefined && value !== null;
+    }
+
     function arrayFrom(arrayLike) {
         var length = arrayLike.length;
         var array = [];
@@ -49,7 +53,7 @@ module.exports = (function() {
     }
 
     function forEachNode(root, cb) {
-        cb(root);
+        if (cb(root) === false) { return; }
 
         forEach(arrayFrom(root.childNodes), function(node) {
             forEachNode(node, cb);
@@ -57,7 +61,7 @@ module.exports = (function() {
     }
 
     function get(object, property) {
-        var props = (property || '').split('.') || undefined;
+        var props = property.match(/[^.\[\]]+/g);
 
         return props && props.reduce(function(object, prop) {
             return object && object[prop];
@@ -68,7 +72,7 @@ module.exports = (function() {
         var string = '';
 
         forEach(template, function(part, index) {
-            string += part + (values[index] || '');
+            string += part + (existy(values[index]) ? values[index] : '');
         });
 
         return string;
@@ -108,13 +112,19 @@ module.exports = (function() {
             return this;
         },
 
-        parse: function(root, context) {
+        parse: function(root, _options_) {
+            var options = _options_ || {};
+            var context = options.context;
+            var filter = options.filter;
+
             var nodes = [];
             var compileFns = [];
 
             forEachNode(root, function(node) {
-                var item,
-                    keys;
+                var item, keys;
+                var isText = node instanceof Text;
+
+                if (filter && !isText && !filter(node)) { return false; }
 
                 forEach(directives, function(directive) {
                     if (matches(node, directive.matcher)) {
@@ -122,13 +132,13 @@ module.exports = (function() {
                     }
                 });
 
-                if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
+                if (isText && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
                         attributes: null,
                         text: {
                             template: node.textContent.split(matcher),
                             keys: keys,
-                            values: new Array(keys.length),
+                            values: keys,
                             node: node
                         }
                     };
@@ -152,7 +162,7 @@ module.exports = (function() {
                         })).attributes.push({
                             template: value.split(matcher),
                             keys: keys,
-                            values: new Array(keys.length),
+                            values: keys,
                             domAttr: attr
                         });
                     }

@@ -23,13 +23,15 @@
                         '<span id="test-attr-style" style="width: {{dims.width}}px; height: {{dims.height}}px;">Hello<span>',
                         '{{prop.does.not.exist}}',
                     '</div>',
-                    '<section>',
+                    '<section data-name="{{name}}">',
                         '<p id="test-attr-class" class="{{classes.p.name}}">Cool</p>',
-                        '<p id="test-text-p">Hello. My Name is {{name}}!</p>',
+                        '<p id="test-text-p" data-foo="{{bar}}">Hello. My Name is {{name}}!</p>',
                         '<p id="test-text-multiple">{{name}} is {{name}}!</p>',
                         '<img id="test-attr-prefix" tb-src="{{img}}"></img>',
                     '</section>',
                     '<div></div>',
+                    '<span id="test-falsy">{{false}}{{zero}}{{null}}{{undefined}}</span>',
+                    '<span id="test-array-notation">{{people[1].parents[0].name}}</span>',
                 '</div>'
             ].join('\n'));
             $('body').append($testBox);
@@ -72,7 +74,7 @@
 
                 beforeEach(function() {
                     data = { hello: 'world' };
-                    compile = tb.parse($testBox[0], data);
+                    compile = tb.parse($testBox[0], { context: data });
                 });
 
                 it('should call the directive parseFn for each matched element', function() {
@@ -126,10 +128,23 @@
                         });
                     });
                 });
+
+                describe('without options', function() {
+                    beforeEach(function() {
+                        parseFn.calls.reset();
+                        compile = tb.parse($testBox[0]);
+                    });
+
+                    it('should call the directive parseFn with no context', function() {
+                        $.each($testBox.find('div'), function(index, element) {
+                            expect(parseFn).toHaveBeenCalledWith(element, undefined);
+                        });
+                    });
+                });
             });
         });
 
-        describe('tb.parse(node)', function() {
+        describe('tb.parse(node, options)', function() {
             var result;
 
             beforeEach(function() {
@@ -138,6 +153,57 @@
 
             it('should return a function', function() {
                 expect(result).toEqual(jasmine.any(Function));
+            });
+
+            describe('if a filter is provided', function() {
+                var compile;
+                var original;
+
+                beforeEach(function() {
+                    original = $testBox.find('section').html();
+
+                    compile = tb.parse($testBox[0], {
+                        filter: function(node) {
+                            return node.tagName.toLowerCase() !== 'section';
+                        }
+                    });
+                });
+
+                describe('when the template is compiled', function() {
+                    var model;
+
+                    beforeEach(function() {
+                        model = {
+                            img: 'some-img.png',
+                            dims: { width: 300, height: 250 },
+                            classes: {
+                                p: { name: 'foo' }
+                            },
+                            name: 'Starlee'
+                        };
+
+                        compile(model);
+                    });
+
+                    it('should update elements that pass the filter', function() {
+                        var $css = $testBox.find('#css');
+                        var $styleTest = $testBox.find('#test-attr-style');
+
+                        expect($css.text()).toBe([
+                            '',
+                            '.texty {',
+                                'background: url("' + model.img + '");',
+                            '}',
+                            ''
+                        ].join('\n'));
+                        expect($styleTest.attr('style')).toBe('width: ' + model.dims.width + 'px; height: ' + model.dims.height + 'px;');
+                    });
+
+                    it('should not modify elements that do not pass the filter', function() {
+                        expect($testBox.find('section').html()).toBe(original);
+                        expect($testBox.find('section').attr('data-name')).toBe('{{name}}');
+                    });
+                });
             });
 
             describe('the compile function', function() {
@@ -156,7 +222,15 @@
                             }
                         },
                         name: 'Joshua Minzner',
-                        img: 'foo.jpg'
+                        img: 'foo.jpg',
+                        false: false,
+                        zero: 0,
+                        undefined: undefined,
+                        null: null,
+                        people: [
+                            null,
+                            { parents: [{ name: 'Harold' }] }
+                        ]
                     };
 
                     compile = result;
@@ -197,10 +271,23 @@
                     expect($pText.text()).toBe('Hello. My Name is Jessica Minzner!');
                 });
 
+                it('should make bindings for missing properties disappear', function() {
+                    expect($testBox.find('#test-attr-style').parent().text().replace(/\n/g, '')).toBe('Hello');
+                    expect($testBox.find('#test-text-p').attr('data-foo')).toBe('');
+                });
+
+                it('should only replace null and undefined with an empty string', function() {
+                    expect($testBox.find('#test-falsy').text()).toBe('false0');
+                });
+
                 it('should support multiple bindings to the same property', function() {
                     var $multiple = $testBox.find('#test-text-multiple');
 
                     expect($multiple.text()).toBe('Joshua Minzner is Joshua Minzner!');
+                });
+
+                it('should support array notation', function() {
+                    expect($testBox.find('#test-array-notation').text()).toBe('Harold');
                 });
 
                 it('should bind attributes prefixed with "tb" to their unprefixed counterpart', function() {
