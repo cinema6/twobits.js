@@ -49,7 +49,7 @@ Use TwoBits.js is easy!
     * **root** (`Element`): A DOM element to parse.
     * **options** *optional* (`Object`): May contain the following properties:
         * **context** (any): A value that will be passed as the second argument to each directive `parseFn`.
-        * **filter** (`Function`): If provided, this function will be invoked recursively with each child element of the `root`. If the filter returns a falsy value, the `Element` and all of its children will not be parsed.
+        * **filter** (`Function`): If provided, this function will be invoked recursively with each child of the `root`. If the filter returns a falsy value, the `Node` and all of its children will not be parsed.
 * Returns:
     * **compile(context)** (`Function`): A function that, when called, will update the `root` with provided `context` data
 
