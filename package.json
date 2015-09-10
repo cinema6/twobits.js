@@ -1,6 +1,6 @@
 {
   "name": "twobits.js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A lightweight template library for the DOM.",
   "main": "twobits.js",
   "scripts": {
