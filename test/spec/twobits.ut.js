@@ -164,7 +164,7 @@
 
                     compile = tb.parse($testBox[0], {
                         filter: function(node) {
-                            return node.tagName.toLowerCase() !== 'section';
+                            return !node.tagName || node.tagName.toLowerCase() !== 'section';
                         }
                     });
                 });

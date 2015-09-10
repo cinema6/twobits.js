@@ -122,9 +122,8 @@ module.exports = (function() {
 
             forEachNode(root, function(node) {
                 var item, keys;
-                var isText = node instanceof Text;
 
-                if (filter && !isText && !filter(node)) { return false; }
+                if (filter && !filter(node)) { return false; }
 
                 forEach(directives, function(directive) {
                     if (matches(node, directive.matcher)) {
@@ -132,7 +131,7 @@ module.exports = (function() {
                     }
                 });
 
-                if (isText && (keys = keysOfTemplate(node.textContent)).length) {
+                if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
                         attributes: null,
                         text: {
