@@ -18,6 +18,10 @@ module.exports = (function() {
         };
     }());
 
+    function existy(value) {
+        return value !== undefined && value !== null;
+    }
+
     function arrayFrom(arrayLike) {
         var length = arrayLike.length;
         var array = [];
@@ -68,7 +72,7 @@ module.exports = (function() {
         var string = '';
 
         forEach(template, function(part, index) {
-            string += part + (values[index] || '');
+            string += part + (existy(values[index]) ? values[index] : '');
         });
 
         return string;

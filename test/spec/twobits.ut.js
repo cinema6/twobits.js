@@ -30,6 +30,7 @@
                         '<img id="test-attr-prefix" tb-src="{{img}}"></img>',
                     '</section>',
                     '<div></div>',
+                    '<span id="test-falsy">{{false}}{{zero}}{{null}}{{undefined}}</span>',
                 '</div>'
             ].join('\n'));
             $('body').append($testBox);
@@ -220,7 +221,11 @@
                             }
                         },
                         name: 'Joshua Minzner',
-                        img: 'foo.jpg'
+                        img: 'foo.jpg',
+                        false: false,
+                        zero: 0,
+                        undefined: undefined,
+                        null: null
                     };
 
                     compile = result;
@@ -264,6 +269,10 @@
                 it('should make bindings for missing properties disappear', function() {
                     expect($testBox.find('#test-attr-style').parent().text().replace(/\n/g, '')).toBe('Hello');
                     expect($testBox.find('#test-text-p').attr('data-foo')).toBe('');
+                });
+
+                it('should only replace null and undefined with an empty string', function() {
+                    expect($testBox.find('#test-falsy').text()).toBe('false0');
                 });
 
                 it('should support multiple bindings to the same property', function() {
