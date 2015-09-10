@@ -49,7 +49,7 @@ module.exports = (function() {
     }
 
     function forEachNode(root, cb) {
-        cb(root);
+        if (cb(root) === false) { return; }
 
         forEach(arrayFrom(root.childNodes), function(node) {
             forEachNode(node, cb);
@@ -111,13 +111,16 @@ module.exports = (function() {
         parse: function(root, _options_) {
             var options = _options_ || {};
             var context = options.context;
+            var filter = options.filter;
 
             var nodes = [];
             var compileFns = [];
 
             forEachNode(root, function(node) {
-                var item,
-                    keys;
+                var item, keys;
+                var isText = node instanceof Text;
+
+                if (filter && !isText && !filter(node)) { return false; }
 
                 forEach(directives, function(directive) {
                     if (matches(node, directive.matcher)) {
@@ -125,7 +128,7 @@ module.exports = (function() {
                     }
                 });
 
-                if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
+                if (isText && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
                         attributes: null,
                         text: {

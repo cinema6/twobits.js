@@ -23,7 +23,7 @@
                         '<span id="test-attr-style" style="width: {{dims.width}}px; height: {{dims.height}}px;">Hello<span>',
                         '{{prop.does.not.exist}}',
                     '</div>',
-                    '<section>',
+                    '<section data-name="{{name}}">',
                         '<p id="test-attr-class" class="{{classes.p.name}}">Cool</p>',
                         '<p id="test-text-p" data-foo="{{bar}}">Hello. My Name is {{name}}!</p>',
                         '<p id="test-text-multiple">{{name}} is {{name}}!</p>',
@@ -151,6 +151,57 @@
 
             it('should return a function', function() {
                 expect(result).toEqual(jasmine.any(Function));
+            });
+
+            describe('if a filter is provided', function() {
+                var compile;
+                var original;
+
+                beforeEach(function() {
+                    original = $testBox.find('section').html();
+
+                    compile = tb.parse($testBox[0], {
+                        filter: function(node) {
+                            return node.tagName.toLowerCase() !== 'section';
+                        }
+                    });
+                });
+
+                describe('when the template is compiled', function() {
+                    var model;
+
+                    beforeEach(function() {
+                        model = {
+                            img: 'some-img.png',
+                            dims: { width: 300, height: 250 },
+                            classes: {
+                                p: { name: 'foo' }
+                            },
+                            name: 'Starlee'
+                        };
+
+                        compile(model);
+                    });
+
+                    it('should update elements that pass the filter', function() {
+                        var $css = $testBox.find('#css');
+                        var $styleTest = $testBox.find('#test-attr-style');
+
+                        expect($css.text()).toBe([
+                            '',
+                            '.texty {',
+                                'background: url("' + model.img + '");',
+                            '}',
+                            ''
+                        ].join('\n'));
+                        expect($styleTest.attr('style')).toBe('width: ' + model.dims.width + 'px; height: ' + model.dims.height + 'px;');
+                    });
+
+                    it('should not modify elements that do not pass the filter', function() {
+                        expect($testBox.find('section').html()).toBe(original);
+                        expect($testBox.find('section').attr('data-name')).toBe('{{name}}');
+                    });
+                });
             });
 
             describe('the compile function', function() {
