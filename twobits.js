@@ -133,12 +133,12 @@ module.exports = (function() {
 
                 if (node instanceof Text && (keys = keysOfTemplate(node.textContent)).length) {
                     item = {
+                        node: node,
                         attributes: null,
                         text: {
                             template: node.textContent.split(matcher),
                             keys: keys,
-                            values: keys,
-                            node: node
+                            values: keys
                         }
                     };
                 }
@@ -150,19 +150,17 @@ module.exports = (function() {
                     if ((keys = keysOfTemplate(value)).length) {
                         if (attrPrefix.test(name)) {
                             name = name.replace(attrPrefix, '');
-
-                            node.setAttribute(name, '');
-                            attr = node.attributes[name];
                         }
 
                         (item || (item = {
+                            node: node,
                             attributes: [],
                             text: null
                         })).attributes.push({
                             template: value.split(matcher),
                             keys: keys,
                             values: keys,
-                            domAttr: attr
+                            name: name
                         });
                     }
                 });
@@ -177,26 +175,26 @@ module.exports = (function() {
                     return prop ? get(context, prop) : context;
                 }
 
-                forEach(nodes, function(node) {
+                forEach(nodes, function(item) {
                     var text;
                     var values;
 
                     /* jshint boss:true */
-                    if (text = node.text) {
+                    if (text = item.text) {
                     /* jshint boss:false */
                         values = map(text.keys, getter);
 
                         if (isDirty(text, values)) {
-                            text.node.textContent = compile(text.template, values);
+                            item.node.textContent = compile(text.template, values);
                         }
                     }
 
-                    if (node.attributes) {
-                        forEach(node.attributes, function(attr) {
+                    if (item.attributes) {
+                        forEach(item.attributes, function(attr) {
                             values = map(attr.keys, getter);
 
                             if (isDirty(attr, values)) {
-                                attr.domAttr.value = compile(attr.template, values);
+                                item.node.setAttribute(attr.name, compile(attr.template, values));
                             }
                         });
                     }
